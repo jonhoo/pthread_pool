@@ -15,6 +15,7 @@ struct pool {
 	unsigned int remaining;
 	unsigned int nthreads;
 	struct pool_queue *q;
+	struct pool_queue *end;
 	pthread_mutex_t q_mtx;
 	pthread_cond_t q_cnd;
 	pthread_t threads[1];
@@ -45,11 +46,13 @@ void pool_enqueue(void *pool, void *arg, char free) {
 	struct pool *p = (struct pool *) pool;
 	struct pool_queue *q = (struct pool_queue *) malloc(sizeof(struct pool_queue));
 	q->arg = arg;
+	q->next = NULL;
 	q->free = free;
 
 	pthread_mutex_lock(&p->q_mtx);
-	q->next = p->q;
-	p->q = q;
+	if (p->end != NULL) p->end->next = q;
+	if (p->q == NULL) p->q = q;
+	p->end = q;
 	p->remaining++;
 	pthread_cond_signal(&p->q_cnd);
 	pthread_mutex_unlock(&p->q_mtx);
@@ -106,6 +109,7 @@ static void * thread(void *arg) {
 		}
 		q = p->q;
 		p->q = q->next;
+		p->end = (q == p->end ? NULL : p->end);
 		pthread_mutex_unlock(&p->q_mtx);
 
 		p->fn(q->arg);
