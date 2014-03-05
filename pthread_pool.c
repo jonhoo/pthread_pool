@@ -33,6 +33,7 @@ void * pool_start(void * (*thread_func)(void *), unsigned int threads) {
 	p->fn = thread_func;
 	p->cancelled = 0;
 	p->remaining = 0;
+	p->end = NULL;
 	p->q = NULL;
 
 	for (i = 0; i < threads; i++) {
