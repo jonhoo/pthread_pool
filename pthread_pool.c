@@ -41,7 +41,7 @@ void * pool_start(void * (*thread_func)(void *), unsigned int threads) {
 	}
 
 	return p;
-};
+}
 
 void pool_enqueue(void *pool, void *arg, char free) {
 	struct pool *p = (struct pool *) pool;
@@ -67,7 +67,7 @@ void pool_wait(void *pool) {
 		pthread_cond_wait(&p->q_cnd, &p->q_mtx);
 	}
 	pthread_mutex_unlock(&p->q_mtx);
-};
+}
 
 void pool_end(void *pool) {
 	struct pool *p = (struct pool *) pool;
@@ -126,4 +126,4 @@ static void * thread(void *arg) {
 	}
 
 	return NULL;
-};
+}
